@@ -1,6 +1,9 @@
 package com.example.hw333.task1;
 
 import androidx.appcompat.app.AppCompatActivity;
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 import io.reactivex.Observable;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -22,34 +25,40 @@ public class Task1Activity extends AppCompatActivity {
     private Observable<String> observable;
     private Disposable disposable;
 
-    private Button bsubscribe;
-    private Button bunsubscribe;
-    private TextView editText;
+    @BindView(R.id.b_subscrybe)
+    Button bsubscribe;
+    @BindView(R.id.b_un_subscrybe)
+    Button bunsubscribe;
+    @BindView(R.id.editText)
+    TextView editText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_task1);
-
-        bsubscribe = findViewById(R.id.b_subscrybe);
-        bunsubscribe = findViewById(R.id.b_un_subscrybe);
-        editText = findViewById(R.id.editText);
+        ButterKnife.bind(this);
 
         rxPresenter = new Task1Presenter();
         observable = rxPresenter.getMessage();
+    }
 
-        bsubscribe.setOnClickListener(v -> {
-            disposable = observable.observeOn(AndroidSchedulers.mainThread()).subscribe(string -> {
-                Log.d(TAG, "onNext: " + Thread.currentThread().getName() + string);
-                editText.append(string);
-            }, throwable -> {
-                Log.d(TAG, "onError: ");
-            }, () -> {
-                Log.d(TAG, "onComplete: ");
-            });
-            Log.d(TAG, "subscribe: end " + Thread.currentThread().getName());
-        });
-
-        bunsubscribe.setOnClickListener(v -> disposable.dispose());
+    @OnClick({R.id.b_subscrybe, R.id.b_un_subscrybe})
+    void onSubscrybeClick(View view) {
+        switch (view.getId()) {
+            case R.id.b_subscrybe:
+                disposable = observable.observeOn(AndroidSchedulers.mainThread()).subscribe(string -> {
+                    Log.d(TAG, "onNext: " + Thread.currentThread().getName() + string);
+                    editText.append(string);
+                }, throwable -> {
+                    Log.d(TAG, "onError: ");
+                }, () -> {
+                    Log.d(TAG, "onComplete: ");
+                });
+                Log.d(TAG, "subscribe: end " + Thread.currentThread().getName());
+                break;
+            case R.id.b_un_subscrybe:
+                disposable.dispose();
+                break;
+        }
     }
 }
